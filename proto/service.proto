@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package myapp;
+
+message Person {
+  string name = 1;
+  string phone = 2;
+}
+
+service MyService {
+  rpc SendData(stream Person) returns (Empty) {}
+}
+
+message Empty {}

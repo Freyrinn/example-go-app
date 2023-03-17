@@ -1,0 +1,46 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: '1.17'
+      id: go
+
+    - name: Cache Go modules
+      uses: actions/cache@v2
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.mod') }}
+
+    - name: Install dependencies
+      run: go mod download
+
+    - name: Build
+      run: go build -v ./...
+
+    - name: Test
+      run: go test -v ./...
+
+    - name: Generate documentation
+      run: go doc -all -u -html -dir ./ > docs.html
+
+    - name: Publish documentation
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./
+        publish_branch: gh-pages
